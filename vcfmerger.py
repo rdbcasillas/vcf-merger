@@ -21,10 +21,6 @@ chromLocations = set(getAllPositions(args.vcf1,args.vcf2))
 
 def mergeVCFs(file1, file2):
     with open(args.output, 'a') as out:
-        # out.write('##fileformat=VCFv4.1\n')
-        # out.write('##source=newmerge.py\n')
-        # out.write('\t'.join(['#CHROM','POS','ID','REF','ALT','QUAL','FILTER','INFO','FORMAT'])+'\n')
-
         for loc in chromLocations:
             tmp1 =  getLinesWithLocation(loc, file1)
             tmp2 =  getLinesWithLocation(loc, file2)
@@ -36,7 +32,6 @@ def mergeVCFs(file1, file2):
                 newinfotags = vcf1cols[7] + ";" + vcf2cols[7] + ";calledBy=" + tool1 + "+" + tool2
                 newformattags = getFormatTags(vcf1cols[8], vcf2cols[8], tool1, tool2)
                 newformattagvals = vcf1cols[9].strip('\n') + ":" + vcf2cols[9].strip('\n')
-
                 newlist.extend((vcf1cols[0], vcf1cols[1], vcf1cols[2], vcf1cols[3],vcf1cols[4],vcf2cols[5],vcf2cols[6],newinfotags,newformattags, newformattagvals))
                 commonline = '\t'.join(newlist)
                 out.write(commonline + "\n")
@@ -44,26 +39,25 @@ def mergeVCFs(file1, file2):
                 tmpcols = tmp1[0].split('\t')
                 tmpcols[7] = tmpcols[7]+";"+ tool1 + "_Only"
                 firstToolLine = '\t'.join(tmpcols)
-                out.write(firstToolLine + "\n")
-            else: 
+                out.write(firstToolLine)
+            else:
                 tmpcols2 = tmp2[0].split('\t')
                 tmpcols2[7] = tmpcols2[7]+";"+ tool2 + "_Only"
                 secondToolLine = '\t'.join(tmpcols2)
                 out.write(secondToolLine)
 
-def sortOutput():
-    with open(args.output, 'rt') as vcf:
-        with open(args.output + ".sorted", 'a') as out:
-            out.write('##fileformat=VCFv4.1\n')
-            out.write('##source=newmerge.py\n')
-            out.write('\t'.join(['#CHROM','POS','ID','REF','ALT','QUAL','FILTER','INFO','FORMAT'])+'\n')
+def sortOutput(unsortedvcf):
+    with open(unsortedvcf, 'rt') as vcf, open("sorted_" + args.output, 'a') as outfile:
+            outfile.write('##fileformat=VCFv4.1\n')
+            outfile.write('##source=newmerge.py\n')
+            outfile.write('\t'.join(['#CHROM','POS','ID','REF','ALT','QUAL','FILTER','INFO','FORMAT'])+'\n')
             reader = csv.reader(vcf, delimiter='\t')
-            #out.writerows
-            for line in sorted(reader, key=lambda row: (int(row[0][3:]), int(row[1]))):
-                out.write(line)
+            writer = csv.writer(outfile, delimiter='\t')
+            writer.writerows(sorted(reader, key=lambda row: (int(row[0][3:]), int(row[1]))))
+
 def main():
    mergeVCFs(args.vcf1,args.vcf2) 
-   sortOutput()
+   sortOutput(args.output)
 
 if __name__ == "__main__":
     main()
