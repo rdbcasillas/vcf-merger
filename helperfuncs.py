@@ -1,5 +1,6 @@
 from re import match
 def getAllPositions(file1, file2):
+    """Collects all the positions in two vcfs without duplicates"""
     locationArray = []
     with open(file1, 'rt') as vcf1:
         for line1 in vcf1:
@@ -20,6 +21,7 @@ def getAllPositions(file1, file2):
 
 
 def getLinesWithLocation(chromloc, vcf):
+    """Takes a location and fetches the corresponding line in the vcf"""
     myline = []
     with open(vcf, 'rt') as vcflines:
         for line in vcflines:
@@ -29,6 +31,7 @@ def getLinesWithLocation(chromloc, vcf):
 
 
 def getFormatTags(format1, format2, tool1, tool2):
+    """Updates the common FORMAT tags by adding respective tool names"""
     formatTags = []
     format1 = format1.split(':')
     format2 = format2.split(':')
